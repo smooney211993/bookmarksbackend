@@ -36,10 +36,10 @@ app.get('/user', async (req,res,next)=>{
 
 })
 
-//  get all user saved bookmarks
+//  get all user saved bookmarks, all the unique savedbookmarks
 app.get('/bookmarks', async (req,res,next)=>{
    /* const data =  await db.select('*').from("savedbookmarks").where('id', '=', '5')*/
-   const data = await db('savedbookmarks').distinct('bookmarks_name','bookmarks_url').where('id', '=','5')
+   const data = await db('savedbookmarks').distinct('bookmarks_id','bookmarks_name','bookmarks_url').where('id', '=','5')
     res.send(data)
     console.log(data.length)
 })
@@ -51,15 +51,18 @@ app.post('/bookmarks', async (req,res,next)=>{
         return res.status(400).json('incorrect form submission');
     }
         try {
-            const bookmarks = await db('savedbookmarks').returning('*').insert({
+            const bookmarks = await db('savedbookmarks').returning('id').insert({
                 bookmarks_name:name, 
                 bookmarks_url: url, 
                 date_created: new Date(),
                  id: id})
-            res.json(bookmarks[0])
+            //res.json(bookmarks[0])
+            console.log(bookmarks[0])    
+            const userBookmarks = await db('savedbookmarks').distinct('*').where('id', '=', bookmarks[0])
+            res.json(userBookmarks)
 
         } catch (error) {
-            res.status(400).json('unable to register')
+            res.status(400).json('unable to add bookmarks')
         }  
 
 })
@@ -100,8 +103,35 @@ app.post('/register', async (req,res,next)=>{
 
 })
 
-app.post('/signin', (req,res,next)=>{
-    
+app.post('/signin', async (req,res,next)=>{
+    const {email, password} = req.body;
+    try{
+        const data = await db.select('email', 'hash').from('login')
+        .where('email', '=', email)
+        if(bcrypt.compareSync(password, data[0].hash)){
+            const user = await db.select('*')
+            .from('users')
+            .where('email', '=', email)
+            //res.send(user[0])
+            console.log(user[0].id)
+            const id = user[0].id;
+            const bookmarks = await db('savedbookmarks').distinct('*').where('id', '=',id)
+            const jsonObj = {
+                user : user[0],
+                bookmarks: bookmarks
+            }
+            res.json(jsonObj)
+
+
+
+          } else {
+              res.status(400).send('wrong credentials')
+          }
+
+    }catch(error){
+        res.status(400).send('unable to connect')
+
+    }
 })
 
 
