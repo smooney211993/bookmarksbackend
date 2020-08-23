@@ -51,16 +51,13 @@ app.post('/bookmarks', async (req,res,next)=>{
         return res.status(400).json('incorrect form submission');
     }
         try {
-            const bookmarks = await db('savedbookmarks').returning('id').insert({
+            const bookmarks = await db('savedbookmarks').returning('*').insert({
                 bookmarks_name:name, 
                 bookmarks_url: url, 
                 date_created: new Date(),
                  id: id})
-            //res.json(bookmarks[0])
-            console.log(bookmarks[0])    
-            const userBookmarks = await db('savedbookmarks').distinct('*').where('id', '=', bookmarks[0])
-            res.json(userBookmarks)
-
+            res.json(bookmarks[0])
+            
         } catch (error) {
             res.status(400).json('unable to add bookmarks')
         }  
