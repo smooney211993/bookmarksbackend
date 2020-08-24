@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const knex = require('knex');
 const bcrypt = require('bcryptjs');
+const { response } = require('express');
 const db = knex({
     client : 'pg',
     connection : {
@@ -35,13 +36,27 @@ app.get('/user', async (req,res,next)=>{
     console.log(data)
 
 })
+// bookmarks params
+app.param('bookmarkId', async (req,res,next, id)=>{
+    try {
+   const bookmark = await db.select('*').from('savedbookmarks').where({bookmarks_id: id})
+     if(bookmark.length){
+         req.bookmark = bookmark[0];
+         next();
+        } else {
+         res.status(400).send('not found')
+          }
+     } catch(error){
+         response.status(400).send('error getting request')
+     }
 
-//  get all user saved bookmarks, all the unique savedbookmarks
-app.get('/bookmarks', async (req,res,next)=>{
-   /* const data =  await db.select('*').from("savedbookmarks").where('id', '=', '5')*/
-   const data = await db('savedbookmarks').distinct('bookmarks_id','bookmarks_name','bookmarks_url').where('id', '=','5')
-    res.send(data)
-    console.log(data.length)
+ }) 
+
+
+app.get('/bookmarks/:bookmarkId', async (req,res,next)=>{
+    //const savedBookmarks = await db.select('*').from('savedbookmarks').where('bookmarks_id', '=', '1')
+    res.json(req.bookmark)
+    console.log(req.bookmark)
 })
 
 // add bookmarks to the database
@@ -63,6 +78,12 @@ app.post('/bookmarks', async (req,res,next)=>{
         }  
 
 })
+//delete bookmarks
+app.delete('/bookmarks', async(req,res,next)=>{
+    
+
+})
+
 // register user
 app.post('/register', async (req,res,next)=>{
     const {password, email,name} = req.body;
