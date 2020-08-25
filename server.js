@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const knex = require('knex');
 const bcrypt = require('bcryptjs');
-const db = knex({
+/*const db = knex({
     client : 'pg',
     connection : {
       host: '127.0.0.1',
@@ -12,7 +12,16 @@ const db = knex({
       database: 'bookmarks'
     }
     
-  })
+  }) */
+const db = knex({
+    client: 'pg',
+    connection: {
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false
+            }
+    }
+  });
 const signinin = require('./Controllers/Signin/Signin');
 const register = require('./Controllers/Register/Register');
 const bookmarks = require('./Controllers/Bookmarks/Bookmarks');
