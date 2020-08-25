@@ -3,7 +3,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const knex = require('knex');
 const bcrypt = require('bcryptjs');
-const { response } = require('express');
 const db = knex({
     client : 'pg',
     connection : {
@@ -14,6 +13,9 @@ const db = knex({
     }
     
   })
+const signinin = require('./Controllers/Signin/Signin');
+const register = require('./Controllers/Register/Register');
+const bookmarks = require('./Controllers/Bookmarks/Bookmarks');
 
 
 
@@ -26,16 +28,11 @@ app.use(bodyParser.json())
 
 
 app.get('/', (req,res,next)=>{
-    res.send(' i am working')
+    res.json(' i am working')
 })
 
 
-app.get('/user', async (req,res,next)=>{
-    const data =  await db.select('*').from("users")
-    res.send(data[0])
-    console.log(data)
 
-})
 // bookmarks params
 app.param('bookmarkId', async (req,res,next, id)=>{
     try {
@@ -54,103 +51,19 @@ app.param('bookmarkId', async (req,res,next, id)=>{
 
 
 app.get('/bookmarks/:bookmarkId', async (req,res,next)=>{
-    //const savedBookmarks = await db.select('*').from('savedbookmarks').where('bookmarks_id', '=', '1')
     res.json(req.bookmark)
-    console.log(req.bookmark)
 })
 
 // add bookmarks to the database
-app.post('/bookmarks', async (req,res,next)=>{
-    const {name, url, id} = req.body;
-    if(!name || !url || !id) {
-        return res.status(400).json('incorrect form submission');
-    }
-        try {
-            const bookmarks = await db('savedbookmarks').returning('*').insert({
-                bookmarks_name:name, 
-                bookmarks_url: url, 
-                date_created: new Date(),
-                 id: id})
-            res.json(bookmarks[0])
-            
-        } catch (error) {
-            res.status(400).json('unable to add bookmarks')
-        }  
-
-})
+app.post('/bookmarks',(req,res)=>{bookmarks.handleAddBookmarks(req,res,db)})
 //delete bookmarks
-app.delete('/bookmarks', async(req,res,next)=>{
-    
-
-})
+app.delete('/bookmarks/:bookmarkId', (req,res,next)=>{bookmarks.handleDeleteBookmarks(req,res,db)})
 
 // register user
-app.post('/register', async (req,res,next)=>{
-    const {password, email,name} = req.body;
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(password, salt);
-    if (!email || !name || !password) {
-        return res.status(400).json('incorrect form submission');
-      }
-    db.transaction(async(trx)=>{
-        try{
-            const loginEmail = await trx.insert({
-                hash: hash,
-                email: email
-            }).into('login')
-            .returning('email')
-            console.log(req.body)
-            const user = await trx('users')
-            .returning('*')
-            .insert({
-                email: loginEmail[0],
-                name: name,
-                joined: new Date()
-            })
-
-            console.log(user[0])
-            res.send(user[0])
-            await trx.commit
-        }catch(error){
-            await trx.rollback
-            res.status(400).json('unable to register')
-
-        }
-    })
-    
-
-})
-
-app.post('/signin', async (req,res,next)=>{
-    const {email, password} = req.body;
-    try{
-        const data = await db.select('email', 'hash').from('login')
-        .where('email', '=', email)
-        if(bcrypt.compareSync(password, data[0].hash)){
-            const user = await db.select('*')
-            .from('users')
-            .where('email', '=', email)
-            //res.send(user[0])
-            console.log(user[0].id)
-            const id = user[0].id;
-            const bookmarks = await db('savedbookmarks').distinct('*').where('id', '=',id)
-            const jsonObj = {
-                user : user[0],
-                bookmarks: bookmarks
-            }
-            res.json(jsonObj)
+app.post('/register',(req,res)=>{register.handleRegister(req,res,db,bcrypt)})
 
 
-
-          } else {
-              res.status(400).send('wrong credentials')
-          }
-
-    }catch(error){
-        res.status(400).send('unable to connect')
-
-    }
-})
+app.post('/signin', (req,res)=>{signinin.handleSignin(req,res,db,bcrypt)})
 
 
 app.listen(PORT, ()=>{
