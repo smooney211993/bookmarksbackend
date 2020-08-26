@@ -36,10 +36,12 @@ const handleDeleteBookmarks = async(req,res,db)=>{
 const handleUpdateBookmarks = async(req,res,db)=>{
     const {name, url} = req.body
     const update = req.bookmark
+    console.log(update)
     try {
         if(update){
             const {bookmarks_id} = req.bookmark;
             const updated = await db('savedbookmarks').where({bookmarks_id: bookmarks_id}).update({bookmarks_name: name, bookmarks_url: url}).returning('updated')
+            console.log(updated)
             res.json(updated)
 
         }
