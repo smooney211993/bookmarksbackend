@@ -67,9 +67,11 @@ app.get('/bookmarks/:bookmarkId', async (req,res,next)=>{
 app.post('/bookmarks',(req,res)=>{bookmarks.handleAddBookmarks(req,res,db)})
 //delete bookmarks
 app.delete('/bookmarks/:bookmarkId', (req,res)=>{bookmarks.handleDeleteBookmarks(req,res,db)})
+app.put('bookmarks/:bookmarkId', (req,res)=>{bookmarks.handleUpdateBookmarks(req,res,db)} )
 
 // register user
 app.post('/register',(req,res)=>{register.handleRegister(req,res,db,bcrypt)})
+
 
 
 app.post('/signin', (req,res)=>{signinin.handleSignin(req,res,db,bcrypt)})
