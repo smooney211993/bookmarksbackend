@@ -67,7 +67,21 @@ app.get('/bookmarks/:bookmarkId', async (req,res,next)=>{
 app.post('/bookmarks',(req,res)=>{bookmarks.handleAddBookmarks(req,res,db)})
 //delete bookmarks
 app.delete('/bookmarks/:bookmarkId', (req,res)=>{bookmarks.handleDeleteBookmarks(req,res,db)})
-app.put('bookmarks/:bookmarkId', (req,res)=>{bookmarks.handleUpdateBookmarks(req,res,db)})
+app.put('/bookmarks', async(req,res)=>{
+  const {name, url, id} = req.body
+  try {
+    const updated = db('savedbookmarks')
+    .where({ bookmarks_id: id })
+    .update({ 
+      bookmarks_name: name ,
+      bookmarks_url: url
+    }).returning('updated')
+    res.json(updated)
+  }catch(error){
+    res.sendStatus(400).json('error')
+  }
+
+})
 
 // register user
 app.post('/register',(req,res)=>{register.handleRegister(req,res,db,bcrypt)})
