@@ -37,11 +37,15 @@ const handleUpdateBookmarks = async(req,res,db)=>{
     const {name, url} = req.body
     const {id} = req.params
     try {
-            const updated = await db('savedbookmarks').where({bookmarks_id: id})
-            .update({bookmarks_name: name, bookmarks_url: url})
-            console.log(updated)
-            res.json(updated)
+        const update = await db('savedbookmarks')
+        .returning('update')
+        .where('bookmarks_id','=',id)
+        .update({
+            bookmarks_name: name,
+            bookmarks_url: url
+        })
 
+        res.json(updated)
         
     } catch (error){
         res.status(400).json('can not update bookmarks')
