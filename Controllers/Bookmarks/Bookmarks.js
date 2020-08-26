@@ -47,7 +47,7 @@ const handleUpdateBookmarks = async(req,res,db)=>{
         })
         .returning('*')
 
-        res.json(updated)
+        res.json(update)
         
     } catch (error){
         res.status(400).json('can not update bookmarks')
