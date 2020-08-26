@@ -25,7 +25,7 @@ const handleDeleteBookmarks = async(req,res,db)=>{
             const deleted = await db("savedbookmarks").where({bookmarks_id: bookmarks_id}).del()
             res.json('succesfully deleted')
         } else {
-            res.sendstatus(400).json('bookmark not found')
+            res.status(400).json('bookmark not found')
         }
     } catch (error) {
         
@@ -45,7 +45,7 @@ const handleUpdateBookmarks = async(req,res,db)=>{
 
         
     } catch (error){
-        res.sendstatus(400).json('can not update bookmarks')
+        res.status(400).json('can not update bookmarks')
     }
 }
 
