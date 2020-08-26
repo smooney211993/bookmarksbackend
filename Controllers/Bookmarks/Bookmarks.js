@@ -35,14 +35,15 @@ const handleDeleteBookmarks = async(req,res,db)=>{
 
 const handleUpdateBookmarks = async(req,res,db)=>{
     const {name, url} = req.body
-    const {bookmarks_id} = req.bookmark
+    
 
     try {
-        const id = bookmarks_id
+        const {bookmarkId} = req.params
         const update = await db('savedbookmarks')
-        .where('bookmarks_id','=',id)
+        .where('bookmarks_id','=',bookmarkdId)
         .update({
-            bookmarks_name: name
+            bookmarks_name: name,
+            bookmarks_url : url
         })
         .returning('*')
 
