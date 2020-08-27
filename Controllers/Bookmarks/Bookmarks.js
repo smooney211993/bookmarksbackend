@@ -33,29 +33,28 @@ const handleDeleteBookmarks = async(req,res,db)=>{
 
 }
 
-const handleUpdateBookmarks = async(req,res,db)=>{
+const handleUpdateBookmarks =  async(req,res,db)=>{
     const {name, url} = req.body
-    
-
     try {
         const {bookmarkId} = req.params
         const update = await db('savedbookmarks')
-        .where('bookmarks_id','=',bookmarkdId)
+        .where('bookmarks_id','=', bookmarkId)
         .update({
             bookmarks_name: name,
             bookmarks_url : url
         })
         .returning('*')
-
+        console.log(update)
+  
         res.json(update)
         
     } catch (error){
         res.status(400).json('can not update bookmarks')
     }
-}
+  }
 
 module.exports = {
     handleDeleteBookmarks : handleDeleteBookmarks,
     handleAddBookmarks: handleAddBookmarks,
-    handleUpdateBookmarks: handleUpdateBookmarks
+    handleUpdateBookmarks : handleUpdateBookmarks
 }
